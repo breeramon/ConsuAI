@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}ConsuAI · Resumo dos Meses{% endblock %}
+{% block conteudo %}
+
+<div class="card destaque destaque-guardado" style="max-width: 420px;">
+    <span class="rotulo">Total guardado em todos os meses</span>
+    <span class="valor">R$ {{ "%.2f"|format(total_guardado_geral) }}</span>
+</div>
+
+<div class="card">
+    <h2>Meses</h2>
+    {% if meses %}
+    <table class="tabela">
+        <thead>
+            <tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Guardado</th></tr>
+        </thead>
+        <tbody>
+            {% for m in meses %}
+            <tr>
+                <td>{{ m.nome_mes }} / {{ m.ano }}</td>
+                <td>R$ {{ "%.2f"|format(m.receitas) }}</td>
+                <td>R$ {{ "%.2f"|format(m.despesas) }}</td>
+                <td class="{% if m.guardado >= 0 %}texto-positivo{% else %}texto-negativo{% endif %}">
+                    R$ {{ "%.2f"|format(m.guardado) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="texto-secundario">Nenhum lançamento registrado ainda.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

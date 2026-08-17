@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}ConsuAI · Criar Conta{% endblock %}
+{% block conteudo %}
+<div class="card card-estreito">
+    <h1>Criar Conta</h1>
+    <form method="POST">
+        <label>Usuário</label>
+        <input type="text" name="username" required autofocus>
+
+        <label>Senha</label>
+        <input type="password" name="senha" required>
+
+        <label>Confirmar Senha</label>
+        <input type="password" name="confirmar_senha" required>
+
+        <label>Salário padrão mensal (opcional)</label>
+        <input type="text" name="salario_padrao" placeholder="Ex: 3500.00">
+        <p class="texto-ajuda">Isso permite lançar seu salário do mês com um clique, sem digitar toda vez.</p>
+
+        <button type="submit" class="btn btn-primario">Criar Conta</button>
+    </form>
+    <p class="texto-secundario">Já tem conta? <a href="{{ url_for('login') }}">Entrar</a></p>
+</div>
+{% endblock %}

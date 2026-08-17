@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block titulo %}ConsuAI · Editar Lançamento{% endblock %}
+{% block conteudo %}
+<div class="card card-estreito">
+    <h1>Editar Lançamento</h1>
+    <form method="POST">
+        <input type="hidden" name="ano" value="{{ lancamento.ano }}">
+        <input type="hidden" name="mes" value="{{ lancamento.mes }}">
+
+        <label>Categoria</label>
+        <select name="categoria" required>
+            <optgroup label="Receitas">
+                {% for c in categorias_receita %}
+                <option value="{{ c }}" {% if c == lancamento.categoria %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Despesas">
+                {% for c in categorias_despesa %}
+                <option value="{{ c }}" {% if c == lancamento.categoria %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </optgroup>
+        </select>
+
+        <label id="rotulo-valor">Valor (R$)</label>
+        <input type="text" name="valor" value="{{ lancamento.valor }}" required>
+
+        <label>Descrição (opcional)</label>
+        <input type="text" name="descricao" value="{{ descricao_exibicao or '' }}">
+
+        <label>Repetição</label>
+        <select name="repeticao" id="repeticao" onchange="alternarRepeticao()">
+            <option value="unica" {% if repeticao_atual == "unica" %}selected{% endif %}>
+                Não repetir (lançamento único)
+            </option>
+            <option value="parcelado" {% if repeticao_atual == "parcelado" %}selected{% endif %}>
+                Parcelado (número fixo de parcelas)
+            </option>
+            <option value="fixo" {% if repeticao_atual == "fixo" %}selected{% endif %}>
+                Fixo (repete todo mês, sem data para acabar)
+            </option>
+        </select>
+
+        <div id="bloco-parcelas" style="display: none;">
+            <label>Em quantas parcelas?</label>
+            <input type="number" name="num_parcelas" id="num_parcelas" min="2" max="60"
+                   value="{{ lancamento.parcela_total or '' }}">
+            {% if repeticao_atual == "parcelado" %}
+            <p class="texto-ajuda">
+                Esta é a parcela {{ lancamento.parcela_atual }} de {{ lancamento.parcela_total }}.
+                Mudar o número de parcelas aqui ajusta os meses seguintes desta série.
+            </p>
+            {% else %}
+            <p class="texto-ajuda">
+                Isso vai transformar este lançamento no início de uma nova série de parcelas,
+                lançada automaticamente nos próximos meses.
+            </p>
+            {% endif %}
+        </div>
+
+        <div id="bloco-fixo" style="display: none;">
+            {% if repeticao_atual == "fixo" %}
+            <p class="texto-ajuda">
+                Este lançamento faz parte de uma despesa fixa. Alterando os dados acima,
+                só esta ocorrência muda — os outros meses continuam com o valor anterior.
+            </p>
+            {% else %}
+            <p class="texto-ajuda">
+                Isso vai transformar este lançamento no início de uma despesa fixa,
+                repetida automaticamente todo mês a partir de agora.
+            </p>
+            {% endif %}
+        </div>
+
+        {% if repeticao_atual in ("parcelado", "fixo") %}
+        <p class="texto-ajuda">
+            Escolher "Não repetir" acima e salvar vai parar essa repetição a partir deste mês
+            (os meses anteriores continuam intactos).
+        </p>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primario">Salvar alterações</button>
+    </form>
+    <a href="{{ url_for('dashboard', ano=lancamento.ano, mes=lancamento.mes) }}" class="btn btn-secundario btn-bloco">Cancelar e voltar</a>
+</div>
+
+<script>
+    function alternarRepeticao() {
+        var select = document.getElementById("repeticao");
+        var blocoParcelas = document.getElementById("bloco-parcelas");
+        var blocoFixo = document.getElementById("bloco-fixo");
+        var numParcelas = document.getElementById("num_parcelas");
+        var rotuloValor = document.getElementById("rotulo-valor");
+
+        blocoParcelas.style.display = "none";
+        blocoFixo.style.display = "none";
+        numParcelas.required = false;
+        rotuloValor.textContent = "Valor (R$)";
+
+        if (select.value === "parcelado") {
+            blocoParcelas.style.display = "block";
+            numParcelas.required = true;
+            rotuloValor.textContent = "Valor da parcela (R$)";
+        } else if (select.value === "fixo") {
+            blocoFixo.style.display = "block";
+        }
+    }
+
+    alternarRepeticao();
+</script>
+{% endblock %}

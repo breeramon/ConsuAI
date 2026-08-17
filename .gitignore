@@ -1,0 +1,11 @@
+# Banco de dados local (dados pessoais, não deve ir para o repositório)
+financas.db
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Ambiente
+.env

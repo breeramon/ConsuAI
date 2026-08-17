@@ -1,0 +1,363 @@
+* { box-sizing: border-box; }
+
+:root {
+    --bg-body: #f4f6f8;
+    --bg-card: #ffffff;
+    --bg-navbar: #1e293b;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border-color: #e5e7eb;
+
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --input-text: #1f2937;
+
+    --btn-secundario-bg: #e5e7eb;
+    --btn-secundario-bg-hover: #d1d5db;
+    --btn-secundario-text: #1f2937;
+
+    --btn-excluir-bg: #fee2e2;
+    --btn-excluir-text: #b91c1c;
+    --btn-excluir-hover: #fecaca;
+
+    --categoria-header-bg: #f3f4f6;
+    --categoria-header-hover: #e5e7eb;
+
+    --alerta-erro-bg: #fee2e2;
+    --alerta-erro-text: #b91c1c;
+    --alerta-sucesso-bg: #d1fae5;
+    --alerta-sucesso-text: #065f46;
+
+    --cor-receita: #2563eb;
+    --cor-despesa: #b45309;
+    --cor-guardado: #059669;
+    --cor-negativo: #dc2626;
+}
+
+[data-theme="dark"] {
+    --bg-body: #0f172a;
+    --bg-card: #1e293b;
+    --bg-navbar: #0b1120;
+    --text-primary: #e5e7eb;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: #334155;
+
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --input-text: #e5e7eb;
+
+    --btn-secundario-bg: #334155;
+    --btn-secundario-bg-hover: #475569;
+    --btn-secundario-text: #e5e7eb;
+
+    --btn-excluir-bg: #4c1d1d;
+    --btn-excluir-text: #fca5a5;
+    --btn-excluir-hover: #5b2323;
+
+    --categoria-header-bg: #273549;
+    --categoria-header-hover: #334155;
+
+    --alerta-erro-bg: #4c1d1d;
+    --alerta-erro-text: #fca5a5;
+    --alerta-sucesso-bg: #14532d;
+    --alerta-sucesso-text: #86efac;
+
+    --cor-receita: #60a5fa;
+    --cor-despesa: #fbbf24;
+    --cor-guardado: #34d399;
+    --cor-negativo: #f87171;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    margin: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Padroniza a cor de links de texto (fora da navbar e dos botões),
+   evitando o roxo padrão do navegador para links visitados no modo escuro. */
+a {
+    color: var(--cor-receita);
+}
+
+a:visited {
+    color: var(--cor-receita);
+}
+
+a:hover {
+    opacity: 0.85;
+}
+
+.navbar {
+    background: var(--bg-navbar);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px;
+    flex-wrap: wrap;
+}
+
+.navbar-brand { font-weight: 600; font-size: 1.1rem; }
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.navbar-links a:hover { color: white; }
+
+.btn-tema {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.btn-tema:hover { background: rgba(255, 255, 255, 0.18); }
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.card-estreito {
+    max-width: 420px;
+    margin: 60px auto;
+}
+
+h1 { margin-top: 0; font-size: 1.5rem; color: var(--text-primary); }
+h2 { margin-top: 0; font-size: 1.15rem; color: var(--text-secondary); }
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 12px 0 4px;
+}
+
+input[type="text"], input[type="password"], input[type="number"], select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: var(--input-bg);
+    color: var(--input-text);
+}
+
+.form-inline {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.form-inline label { margin: 0 0 4px; }
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0 4px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.btn {
+    display: inline-block;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 14px;
+}
+
+.btn-primario, .btn-primario:visited { background: #2563eb; color: white; }
+.btn-primario:hover { background: #1d4ed8; }
+
+.btn-secundario, .btn-secundario:visited { background: var(--btn-secundario-bg); color: var(--btn-secundario-text); }
+.btn-secundario:hover { background: var(--btn-secundario-bg-hover); opacity: 1; }
+
+.btn-bloco {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.btn-excluir {
+    background: var(--btn-excluir-bg);
+    color: var(--btn-excluir-text);
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    margin-top: 0;
+}
+.btn-excluir:hover { background: var(--btn-excluir-hover); }
+
+.btn-pequeno {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    margin-top: 0;
+    margin-right: 6px;
+    text-decoration: none;
+}
+
+.grid-resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.destaque {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.destaque .rotulo { font-size: 0.85rem; color: var(--text-secondary); }
+.destaque .valor { font-size: 1.6rem; font-weight: 700; }
+
+.destaque-receita .valor { color: var(--cor-receita); }
+.destaque-despesa .valor { color: var(--cor-despesa); }
+.destaque-guardado .valor { color: var(--cor-guardado); }
+.destaque-negativo .valor { color: var(--cor-negativo); }
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela th, .tabela td {
+    text-align: left;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.tabela th { color: var(--text-secondary); font-weight: 600; }
+
+.categoria-bloco {
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.categoria-bloco:last-child { margin-bottom: 0; }
+
+.categoria-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--categoria-header-bg);
+    padding: 8px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    color: var(--text-primary);
+}
+
+.categoria-cabecalho::-webkit-details-marker { display: none; }
+.categoria-cabecalho::marker { content: ""; }
+
+.categoria-cabecalho:hover { background: var(--categoria-header-hover); }
+
+.seta {
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform 0.15s ease;
+    color: var(--text-secondary);
+}
+
+.categoria-bloco[open] > .categoria-cabecalho .seta {
+    transform: rotate(90deg);
+}
+
+.lista-itens-categoria { display: flex; flex-direction: column; }
+
+.item-categoria {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.item-categoria:last-child { border-bottom: none; }
+
+.item-categoria-descricao {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.item-categoria-valor {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.badge-fixo {
+    display: inline-block;
+    font-size: 0.72rem;
+    background: var(--categoria-header-bg);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 1px 8px;
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+.texto-secundario { color: var(--text-secondary); font-size: 0.9rem; }
+.texto-ajuda { color: var(--text-muted); font-size: 0.8rem; margin: 4px 0 0; }
+.texto-positivo { color: var(--cor-guardado); font-weight: 600; }
+.texto-negativo { color: var(--cor-negativo); font-weight: 600; }
+
+.alerta {
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.alerta-erro { background: var(--alerta-erro-bg); color: var(--alerta-erro-text); }
+.alerta-sucesso { background: var(--alerta-sucesso-bg); color: var(--alerta-sucesso-text); }
+
+hr { border: none; border-top: 1px solid var(--border-color); margin: 16px 0; }

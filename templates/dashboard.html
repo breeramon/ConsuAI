@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block titulo %}ConsuAI · {{ nome_mes }} {{ ano }}{% endblock %}
+{% block conteudo %}
+
+<div class="card">
+    <form method="GET" class="form-inline">
+        <label>Mês</label>
+        <select name="mes">
+            {% for i in range(1, 13) %}
+            <option value="{{ i }}" {% if i == mes %}selected{% endif %}>{{ meses_pt[i] }}</option>
+            {% endfor %}
+        </select>
+        <label>Ano</label>
+        <input type="number" name="ano" value="{{ ano }}" style="width: 100px;">
+        <input type="hidden" name="categoria_filtro" value="{{ filtro_categoria }}">
+        <input type="hidden" name="descricao_filtro" value="{{ filtro_descricao }}">
+        <input type="hidden" name="valor_min" value="{{ filtro_valor_min }}">
+        <input type="hidden" name="valor_max" value="{{ filtro_valor_max }}">
+        <button type="submit" class="btn btn-secundario">Ver mês</button>
+    </form>
+</div>
+
+<div class="grid-resumo">
+    <div class="card destaque destaque-receita">
+        <span class="rotulo">Receitas do mês</span>
+        <span class="valor">R$ {{ "%.2f"|format(resumo.receitas) }}</span>
+    </div>
+    <div class="card destaque destaque-despesa">
+        <span class="rotulo">Despesas do mês</span>
+        <span class="valor">R$ {{ "%.2f"|format(resumo.despesas_total) }}</span>
+    </div>
+    <div class="card destaque {% if resumo.guardado >= 0 %}destaque-guardado{% else %}destaque-negativo{% endif %}">
+        <span class="rotulo">Guardado no mês</span>
+        <span class="valor">R$ {{ "%.2f"|format(resumo.guardado) }}</span>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Despesas por categoria</h2>
+    {% if resumo.despesas_por_categoria %}
+        {% for c in resumo.despesas_por_categoria %}
+        <details class="categoria-bloco">
+            <summary class="categoria-cabecalho">
+                <span><span class="seta">▸</span>{{ c.categoria }}</span>
+                <span>R$ {{ "%.2f"|format(c.total) }}</span>
+            </summary>
+            <div class="lista-itens-categoria">
+                {% for item in c.itens %}
+                <div class="item-categoria">
+                    <span class="item-categoria-descricao">
+                        {{ item.descricao or "-" }}
+                        {% if item.fixo_grupo %}<span class="badge-fixo">🔁 fixo</span>{% endif %}
+                    </span>
+                    <span class="item-categoria-valor">R$ {{ "%.2f"|format(item.valor) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endfor %}
+    {% else %}
+    <p class="texto-secundario">Nenhuma despesa lançada neste mês ainda.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Adicionar lançamento</h2>
+
+    {% if user.salario_padrao and user.salario_padrao > 0 %}
+    <form method="POST" action="{{ url_for('salario_rapido') }}" class="form-inline">
+        <input type="hidden" name="ano" value="{{ ano }}">
+        <input type="hidden" name="mes" value="{{ mes }}">
+        <button type="submit" class="btn btn-primario">
+            Lançar salário do mês (R$ {{ "%.2f"|format(user.salario_padrao) }})
+        </button>
+    </form>
+    <hr>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('adicionar_lancamento') }}">
+        <input type="hidden" name="ano" value="{{ ano }}">
+        <input type="hidden" name="mes" value="{{ mes }}">
+
+        <label>Categoria</label>
+        <select name="categoria" required>
+            {% if not ultima_categoria %}
+            <option value="" disabled selected>Selecione a categoria</option>
+            {% endif %}
+            <optgroup label="Receitas">
+                {% for c in categorias_receita %}
+                <option value="{{ c }}" {% if c == ultima_categoria %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Despesas">
+                {% for c in categorias_despesa %}
+                <option value="{{ c }}" {% if c == ultima_categoria %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </optgroup>
+        </select>
+
+        <label id="rotulo-valor">Valor (R$)</label>
+        <input type="text" name="valor" placeholder="Ex: 150.00" required>
+
+        <label>Descrição (opcional)</label>
+        <input type="text" name="descricao" placeholder="Ex: Mercado do mês">
+
+        <label>Repetição</label>
+        <select name="repeticao" id="repeticao" onchange="alternarRepeticao()">
+            <option value="unica">Não repetir (lançamento único)</option>
+            <option value="parcelado">Parcelado (número fixo de parcelas)</option>
+            <option value="fixo">Fixo (repete todo mês, sem data para acabar)</option>
+        </select>
+
+        <div id="bloco-parcelas" style="display: none;">
+            <label>Em quantas parcelas?</label>
+            <input type="number" name="num_parcelas" id="num_parcelas" min="2" max="60" placeholder="Ex: 10">
+            <p class="texto-ajuda">
+                O valor informado acima será considerado o valor de cada parcela.
+                Ele será lançado automaticamente neste mês e nos meses seguintes.
+            </p>
+        </div>
+
+        <div id="bloco-fixo" style="display: none;">
+            <p class="texto-ajuda">
+                O valor informado acima será lançado automaticamente todo mês, a partir deste,
+                sem data pra acabar. Se quiser parar, é só editar o lançamento em algum mês
+                futuro e escolher "Não repetir".
+            </p>
+        </div>
+
+        <button type="submit" class="btn btn-primario">Adicionar</button>
+    </form>
+</div>
+
+<script>
+    function alternarRepeticao() {
+        var select = document.getElementById("repeticao");
+        var blocoParcelas = document.getElementById("bloco-parcelas");
+        var blocoFixo = document.getElementById("bloco-fixo");
+        var numParcelas = document.getElementById("num_parcelas");
+        var rotuloValor = document.getElementById("rotulo-valor");
+
+        blocoParcelas.style.display = "none";
+        blocoFixo.style.display = "none";
+        numParcelas.required = false;
+        rotuloValor.textContent = "Valor (R$)";
+
+        if (select.value === "parcelado") {
+            blocoParcelas.style.display = "block";
+            numParcelas.required = true;
+            rotuloValor.textContent = "Valor da parcela (R$)";
+        } else if (select.value === "fixo") {
+            blocoFixo.style.display = "block";
+        }
+    }
+</script>
+
+<div class="card">
+    <h2>Lançamentos de {{ nome_mes }} / {{ ano }}</h2>
+
+    <form method="GET" class="form-inline filtro-lancamentos">
+        <input type="hidden" name="ano" value="{{ ano }}">
+        <input type="hidden" name="mes" value="{{ mes }}">
+
+        <div>
+            <label>Categoria</label>
+            <select name="categoria_filtro">
+                <option value="">Todas</option>
+                <optgroup label="Receitas">
+                    {% for c in categorias_receita %}
+                    <option value="{{ c }}" {% if c == filtro_categoria %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Despesas">
+                    {% for c in categorias_despesa %}
+                    <option value="{{ c }}" {% if c == filtro_categoria %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </optgroup>
+            </select>
+        </div>
+
+        <div>
+            <label>Descrição contém</label>
+            <input type="text" name="descricao_filtro" value="{{ filtro_descricao }}" placeholder="Ex: mercado">
+        </div>
+
+        <div>
+            <label>Valor mínimo</label>
+            <input type="text" name="valor_min" value="{{ filtro_valor_min }}" placeholder="Ex: 50" style="width: 100px;">
+        </div>
+
+        <div>
+            <label>Valor máximo</label>
+            <input type="text" name="valor_max" value="{{ filtro_valor_max }}" placeholder="Ex: 500" style="width: 100px;">
+        </div>
+
+        <button type="submit" class="btn btn-secundario">Filtrar</button>
+        {% if filtros_ativos %}
+        <a href="{{ url_for('dashboard', ano=ano, mes=mes) }}" class="btn btn-secundario">Limpar filtros</a>
+        {% endif %}
+    </form>
+
+    {% if filtros_ativos %}
+    <p class="texto-secundario">
+        Mostrando {{ resumo.lancamentos|length }} lançamento(s) filtrado(s) de {{ nome_mes }} / {{ ano }}.
+    </p>
+    {% endif %}
+
+    {% if resumo.lancamentos %}
+    <table class="tabela">
+        <thead>
+            <tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for l in resumo.lancamentos %}
+            <tr>
+                <td>{% if l.tipo == 'receita' %}Receita{% else %}Despesa{% endif %}</td>
+                <td>{{ l.categoria }}</td>
+                <td>
+                    {{ l.descricao or "-" }}
+                    {% if l.fixo_grupo %}<span class="badge-fixo">🔁 fixo</span>{% endif %}
+                </td>
+                <td>R$ {{ "%.2f"|format(l.valor) }}</td>
+                <td>
+                    <a href="{{ url_for('editar_lancamento', lancamento_id=l.id) }}" class="btn btn-secundario btn-pequeno">Editar</a>
+                    <form method="POST" action="{{ url_for('excluir_lancamento', lancamento_id=l.id) }}" style="display:inline;">
+                        <input type="hidden" name="ano" value="{{ ano }}">
+                        <input type="hidden" name="mes" value="{{ mes }}">
+                        <button type="submit" class="btn btn-excluir" onclick="return confirm('Excluir este lançamento?')">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="texto-secundario">
+        {% if filtros_ativos %}
+            Nenhum lançamento encontrado com esses filtros.
+        {% else %}
+            Nenhum lançamento neste mês ainda.
+        {% endif %}
+    </p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}ConsuAI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            var tema = localStorage.getItem("tema") || "claro";
+            if (tema === "escuro") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+</head>
+<body>
+    {% if session.get('user_id') %}
+    <nav class="navbar">
+        <div class="navbar-brand">💰 ConsuAI</div>
+        <div class="navbar-links">
+            <a href="{{ url_for('dashboard') }}">Mês Atual</a>
+            <a href="{{ url_for('parcelas_abertas') }}">Parcelas Abertas</a>
+            <a href="{{ url_for('resumo') }}">Resumo dos Meses</a>
+            <a href="{{ url_for('configuracoes') }}">Configurações</a>
+            <a href="{{ url_for('logout') }}">Sair ({{ session.get('username') }})</a>
+            <button type="button" class="btn-tema" onclick="alternarTema()" id="botao-tema">🌙 Modo Noturno</button>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="container">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, mensagem in mensagens %}
+                    <div class="alerta alerta-{{ categoria }}">{{ mensagem }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block conteudo %}{% endblock %}
+    </main>
+
+    <script>
+        function atualizarBotaoTema() {
+            var botao = document.getElementById("botao-tema");
+            if (!botao) return;
+            var escuro = document.documentElement.getAttribute("data-theme") === "dark";
+            botao.textContent = escuro ? "☀️ Modo Claro" : "🌙 Modo Noturno";
+        }
+
+        function alternarTema() {
+            var escuro = document.documentElement.getAttribute("data-theme") === "dark";
+            if (escuro) {
+                document.documentElement.removeAttribute("data-theme");
+                localStorage.setItem("tema", "claro");
+            } else {
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("tema", "escuro");
+            }
+            atualizarBotaoTema();
+        }
+
+        atualizarBotaoTema();
+    </script>
+</body>
+</html>

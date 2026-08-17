@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}ConsuAI · Parcelas Abertas · {{ nome_mes }} {{ ano }}{% endblock %}
+{% block conteudo %}
+
+<div class="card">
+    <form method="GET" class="form-inline">
+        <label>Mês</label>
+        <select name="mes">
+            {% for i in range(1, 13) %}
+            <option value="{{ i }}" {% if i == mes %}selected{% endif %}>{{ meses_pt[i] }}</option>
+            {% endfor %}
+        </select>
+        <label>Ano</label>
+        <input type="number" name="ano" value="{{ ano }}" style="width: 100px;">
+        <button type="submit" class="btn btn-secundario">Ver mês</button>
+    </form>
+</div>
+
+<div class="card destaque destaque-despesa" style="max-width: 420px;">
+    <span class="rotulo">Total em parcelas abertas em {{ nome_mes }} / {{ ano }}</span>
+    <span class="valor">R$ {{ "%.2f"|format(resumo.total) }}</span>
+</div>
+
+<div class="card">
+    <h2>Parcelas por categoria</h2>
+    <p class="texto-ajuda" style="margin-bottom: 16px;">
+        Mostra só os lançamentos parcelados deste mês. Despesas fixas recorrentes
+        e lançamentos únicos não entram aqui.
+    </p>
+
+    {% if resumo.categorias %}
+        {% for c in resumo.categorias %}
+        <details class="categoria-bloco">
+            <summary class="categoria-cabecalho">
+                <span><span class="seta">▸</span>{{ c.categoria }}</span>
+                <span>R$ {{ "%.2f"|format(c.total) }}</span>
+            </summary>
+            <div class="lista-itens-categoria">
+                {% for item in c.itens %}
+                <div class="item-categoria">
+                    <span class="item-categoria-descricao">{{ item.descricao or "-" }}</span>
+                    <span class="item-categoria-valor">R$ {{ "%.2f"|format(item.valor) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endfor %}
+    {% else %}
+    <p class="texto-secundario">Nenhuma parcela em aberto em {{ nome_mes }} / {{ ano }}.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

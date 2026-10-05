@@ -4,14 +4,18 @@
 
 <div class="card">
     <form method="GET" class="form-inline">
-        <label>Mês</label>
-        <select name="mes">
-            {% for i in range(1, 13) %}
-            <option value="{{ i }}" {% if i == mes %}selected{% endif %}>{{ meses_pt[i] }}</option>
-            {% endfor %}
-        </select>
-        <label>Ano</label>
-        <input type="number" name="ano" value="{{ ano }}" style="width: 100px;">
+        <div>
+            <label>Mês</label>
+            <select name="mes">
+                {% for i in range(1, 13) %}
+                <option value="{{ i }}" {% if i == mes %}selected{% endif %}>{{ meses_pt[i] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Ano</label>
+            <input type="number" name="ano" value="{{ ano }}" style="width: 100px;">
+        </div>
         <input type="hidden" name="categoria_filtro" value="{{ filtro_categoria }}">
         <input type="hidden" name="descricao_filtro" value="{{ filtro_descricao }}">
         <input type="hidden" name="valor_min" value="{{ filtro_valor_min }}">
@@ -20,18 +24,32 @@
     </form>
 </div>
 
-<div class="grid-resumo">
-    <div class="card destaque destaque-receita">
-        <span class="rotulo">Receitas do mês</span>
-        <span class="valor">R$ {{ "%.2f"|format(resumo.receitas) }}</span>
+{% if resumo.receitas > 0 %}
+    {% set pct = (resumo.despesas_total / resumo.receitas * 100)|round|int %}
+{% else %}
+    {% set pct = 100 if resumo.despesas_total > 0 else 0 %}
+{% endif %}
+
+<div class="hero">
+    <div class="card hero-main">
+        <span class="rotulo">Guardado em {{ nome_mes }} / {{ ano }}</span>
+        <span class="hero-valor {% if resumo.guardado >= 0 %}positivo{% else %}negativo{% endif %}">R$ {{ "%.2f"|format(resumo.guardado) }}</span>
+        <div class="barra-uso" role="img" aria-label="{{ pct }}% da receita gasta">
+            <span style="width: {{ [pct, 100]|min }}%;"></span>
+        </div>
+        <p class="barra-legenda">
+            {% if resumo.receitas > 0 %}{{ pct }}% da receita do mês já foi gasta{% else %}Lance uma receita para acompanhar quanto do mês já foi gasto{% endif %}
+        </p>
     </div>
-    <div class="card destaque destaque-despesa">
-        <span class="rotulo">Despesas do mês</span>
-        <span class="valor">R$ {{ "%.2f"|format(resumo.despesas_total) }}</span>
-    </div>
-    <div class="card destaque {% if resumo.guardado >= 0 %}destaque-guardado{% else %}destaque-negativo{% endif %}">
-        <span class="rotulo">Guardado no mês</span>
-        <span class="valor">R$ {{ "%.2f"|format(resumo.guardado) }}</span>
+    <div class="hero-lateral">
+        <div class="card destaque destaque-receita">
+            <span class="rotulo">Receitas</span>
+            <span class="valor">R$ {{ "%.2f"|format(resumo.receitas) }}</span>
+        </div>
+        <div class="card destaque destaque-despesa">
+            <span class="rotulo">Despesas</span>
+            <span class="valor">R$ {{ "%.2f"|format(resumo.despesas_total) }}</span>
+        </div>
     </div>
 </div>
 
@@ -49,7 +67,7 @@
                 <div class="item-categoria">
                     <span class="item-categoria-descricao">
                         {{ item.descricao or "-" }}
-                        {% if item.fixo_grupo %}<span class="badge-fixo">🔁 fixo</span>{% endif %}
+                        {% if item.fixo_grupo %}<span class="badge-fixo">fixo</span>{% endif %}
                     </span>
                     <span class="item-categoria-valor">R$ {{ "%.2f"|format(item.valor) }}</span>
                 </div>
@@ -206,9 +224,10 @@
     {% endif %}
 
     {% if resumo.lancamentos %}
+    <div class="tabela-wrap">
     <table class="tabela">
         <thead>
-            <tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th></th></tr>
+            <tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th class="col-num">Valor</th><th></th></tr>
         </thead>
         <tbody>
             {% for l in resumo.lancamentos %}
@@ -217,10 +236,10 @@
                 <td>{{ l.categoria }}</td>
                 <td>
                     {{ l.descricao or "-" }}
-                    {% if l.fixo_grupo %}<span class="badge-fixo">🔁 fixo</span>{% endif %}
+                    {% if l.fixo_grupo %}<span class="badge-fixo">fixo</span>{% endif %}
                 </td>
-                <td>R$ {{ "%.2f"|format(l.valor) }}</td>
-                <td>
+                <td class="col-num">R$ {{ "%.2f"|format(l.valor) }}</td>
+                <td class="col-acoes">
                     <a href="{{ url_for('editar_lancamento', lancamento_id=l.id) }}" class="btn btn-secundario btn-pequeno">Editar</a>
                     <form method="POST" action="{{ url_for('excluir_lancamento', lancamento_id=l.id) }}" style="display:inline;">
                         <input type="hidden" name="ano" value="{{ ano }}">
@@ -232,6 +251,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <p class="texto-secundario">
         {% if filtros_ativos %}

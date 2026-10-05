@@ -4,14 +4,18 @@
 
 <div class="card">
     <form method="GET" class="form-inline">
-        <label>Mês</label>
-        <select name="mes">
-            {% for i in range(1, 13) %}
-            <option value="{{ i }}" {% if i == mes %}selected{% endif %}>{{ meses_pt[i] }}</option>
-            {% endfor %}
-        </select>
-        <label>Ano</label>
-        <input type="number" name="ano" value="{{ ano }}" style="width: 100px;">
+        <div>
+            <label>Mês</label>
+            <select name="mes">
+                {% for i in range(1, 13) %}
+                <option value="{{ i }}" {% if i == mes %}selected{% endif %}>{{ meses_pt[i] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Ano</label>
+            <input type="number" name="ano" value="{{ ano }}" style="width: 100px;">
+        </div>
         <button type="submit" class="btn btn-secundario">Ver mês</button>
     </form>
 </div>

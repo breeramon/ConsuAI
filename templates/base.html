@@ -43,7 +43,7 @@
     </nav>
     {% endif %}
 
-    <main class="container">
+    <main class="container{% if not session.get('user_id') %} container-centro{% endif %}">
         {% with mensagens = get_flashed_messages(with_categories=true) %}
             {% if mensagens %}
                 {% for categoria, mensagem in mensagens %}

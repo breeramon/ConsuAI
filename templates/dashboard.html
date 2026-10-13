@@ -35,7 +35,7 @@
         <span class="rotulo">Guardado em {{ nome_mes }} / {{ ano }}</span>
         <span class="hero-valor {% if resumo.guardado >= 0 %}positivo{% else %}negativo{% endif %}">R$ {{ "%.2f"|format(resumo.guardado) }}</span>
         <div class="barra-uso" role="img" aria-label="{{ pct }}% da receita gasta">
-            <span style="width: {{ [pct, 100]|min }}%;"></span>
+            <span data-largura="{{ [pct, 100]|min }}"></span>
         </div>
         <p class="barra-legenda">
             {% if resumo.receitas > 0 %}{{ pct }}% da receita do mês já foi gasta{% else %}Lance uma receita para acompanhar quanto do mês já foi gasto{% endif %}
@@ -150,6 +150,10 @@
 </div>
 
 <script>
+    document.querySelectorAll("[data-largura]").forEach(function (el) {
+        el.style.width = el.dataset.largura + "%";
+    });
+
     function alternarRepeticao() {
         var select = document.getElementById("repeticao");
         var blocoParcelas = document.getElementById("bloco-parcelas");
